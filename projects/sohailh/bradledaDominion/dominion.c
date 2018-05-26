@@ -643,6 +643,90 @@ int getCost(int cardNumber)
   return -1;
 }
 
+
+
+void playSmithy(int currentPlayer, struct gameState * state, int handPos) {
+    
+    int i = 0;
+    
+    // BUG -- Intended to countdown to 0, but will only add 1 card instead of 3
+    for(i; i < 3; i++) {
+        drawCard(currentPlayer, state);
+    }
+    
+    discardCard(handPos, currentPlayer, state, 0);
+}
+
+
+void playAdventurer(int currentPlayer, int temphand[], struct gameState * state, int z) {
+    
+    int drawnTreasure = 0;
+    int cardDrawn;
+    
+
+    while(drawnTreasure < 2) {
+        // BUG -- Deck is shuffled one card too early as it never gets to empty
+      if (state->deckCount[currentPlayer] <= 1) {//if the deck is empty we need to shuffle discard and add to deck
+          shuffle(currentPlayer, state);
+      }
+  
+      drawCard(currentPlayer, state);
+      cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
+      
+      if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+        drawnTreasure++;
+      
+      else {
+        temphand[z]=cardDrawn;
+        state->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
+        z++;
+      }
+  
+    }
+      
+    while(z-1 >= 0) {
+      state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
+      z = z - 1;
+      }
+}
+
+void playVillage(int currentPlayer, struct gameState * state, int handPos) {
+    
+    drawCard(currentPlayer, state);
+    
+    // BUG -- Adds too many actions due to multiplying current actions by 2 instead of adding
+    state->numActions = state->numActions + 2;
+    
+    discardCard(handPos, currentPlayer, state, 0);
+}
+
+
+
+
+
+void playGreatHall(int currentPlayer, struct gameState * state, int handPos) {
+    
+    drawCard(currentPlayer, state);
+    
+    // BUG -- Reduces number of actions by one instead of adding one
+    state->numActions--;
+    
+    discardCard(handPos, currentPlayer, state, 0);
+}
+
+
+
+
+
+void playOutpost(int currentPlayer, struct gameState * state, int handPos) {
+    // BUG -- Outpost only discards cards. No action on outposts themselves occurs.
+    //state->outpostPlayed++;
+    
+    discardCard(handPos, currentPlayer, state, 0);
+}
+
+
+
 int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
   int i;
@@ -1284,86 +1368,6 @@ int updateCoins(int player, struct gameState *state, int bonus)
   state->coins += bonus;
 
   return 0;
-}
-
-void playSmithy(int currentPlayer, struct gameState * state, int handPos) {
-    
-    int i = 3;
-    
-    // BUG -- Intended to countdown to 0, but will only add 1 card instead of 3
-    for(i; i < 3; i--) {
-        drawCard(currentPlayer, state);
-    }
-    
-    discardCard(handPos, currentPlayer, state, 0);
-}
-
-
-void playAdventurer(int currentPlayer, int temphand[], struct gameState * state, int z) {
-    
-    int drawnTreasure = 0;
-    int cardDrawn;
-    
-
-    while(drawnTreasure < 2) {
-        // BUG -- Deck is shuffled one card too early as it never gets to empty
-      if (state->deckCount[currentPlayer] <= 1) {//if the deck is empty we need to shuffle discard and add to deck
-          shuffle(currentPlayer, state);
-      }
-  
-      drawCard(currentPlayer, state);
-      cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
-      
-      if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
-        drawnTreasure++;
-      
-      else {
-        temphand[z]=cardDrawn;
-        state->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
-        z++;
-      }
-  
-    }
-      
-    while(z-1 >= 0) {
-      state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
-      z = z - 1;
-      }
-}
-
-void playVillage(int currentPlayer, struct gameState * state, int handPos) {
-    
-    drawCard(currentPlayer, state);
-    
-    // BUG -- Adds too many actions due to multiplying current actions by 2 instead of adding
-    state->numActions = state->numActions * 2;
-    
-    discardCard(handPos, currentPlayer, state, 0);
-}
-
-
-
-
-
-void playGreatHall(int currentPlayer, struct gameState * state, int handPos) {
-    
-    drawCard(currentPlayer, state);
-    
-    // BUG -- Reduces number of actions by one instead of adding one
-    state->numActions--;
-    
-    discardCard(handPos, currentPlayer, state, 0);
-}
-
-
-
-
-
-void playOutpost(int currentPlayer, struct gameState * state, int handPos) {
-    // BUG -- Outpost only discards cards. No action on outposts themselves occurs.
-    //state->outpostPlayed++;
-    
-    discardCard(handPos, currentPlayer, state, 0);
 }
 
 
